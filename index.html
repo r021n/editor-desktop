@@ -29,88 +29,6 @@
         background: hsl(222.2, 84%, 4.9%);
       }
 
-      .app-bar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        padding: 0.75rem 1.25rem;
-        background: hsla(217.2, 32.6%, 17.5%, 0.6);
-        border: 1px solid hsl(217.2, 32.6%, 17.5%);
-        border-radius: 0.75rem;
-        margin-bottom: 1.5rem;
-        position: sticky;
-        top: 1.5rem;
-        backdrop-filter: blur(12px);
-        z-index: 10;
-      }
-
-      .branding {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        flex: 1;
-        min-width: 0;
-      }
-
-      .branding-logo {
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        background: linear-gradient(
-          135deg,
-          hsl(217.2, 91.2%, 59.8%),
-          hsl(263.4, 70%, 50.4%)
-        );
-        display: grid;
-        place-items: center;
-        font-weight: 700;
-        color: hsl(210, 40%, 98%);
-        letter-spacing: 0.08em;
-      }
-
-      .branding-text h1 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: hsl(210, 40%, 98%);
-        margin-bottom: 0.15rem;
-      }
-
-      .branding-text p {
-        color: hsl(215.4, 16.3%, 66.9%);
-        font-size: 0.85rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .menu-bar {
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-      }
-
-      .menu-item {
-        background: transparent;
-        border: 1px solid transparent;
-        color: hsl(215.4, 16.3%, 76.9%);
-        font-size: 0.85rem;
-        font-weight: 500;
-        padding: 0.35rem 0.9rem;
-        border-radius: 999px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-
-      .menu-item:hover,
-      .menu-item:focus-visible {
-        color: hsl(210, 40%, 98%);
-        border-color: hsl(217.2, 91.2%, 59.8%);
-        background: hsla(217.2, 91.2%, 59.8%, 0.1);
-      }
-
       .top-actions {
         display: flex;
         gap: 0.5rem;
@@ -551,21 +469,6 @@
       }
 
       @media (max-width: 1024px) {
-        .app-bar {
-          flex-direction: column;
-          align-items: flex-start;
-          position: static;
-        }
-
-        .branding-text p {
-          white-space: normal;
-        }
-
-        .menu-bar {
-          width: 100%;
-          justify-content: flex-start;
-        }
-
         .editor-container {
           flex-direction: column-reverse;
         }
@@ -580,10 +483,6 @@
       @media (max-width: 640px) {
         body {
           padding: 1rem;
-        }
-
-        .header h1 {
-          font-size: 1.5rem;
         }
 
         textarea {
@@ -615,23 +514,6 @@
   </head>
   <body>
     <div class="container">
-      <header class="app-bar" aria-label="Menu utama aplikasi">
-        <div class="branding">
-          <div class="branding-logo" aria-hidden="true">TE</div>
-          <div class="branding-text">
-            <h1>Text Editor</h1>
-            <p>Tulis, copy, atau download teks Anda secara cepat.</p>
-          </div>
-        </div>
-        <nav class="menu-bar" aria-label="Navigasi utama">
-          <button class="menu-item" type="button">File</button>
-          <button class="menu-item" type="button">Edit</button>
-          <button class="menu-item" type="button">View</button>
-          <button class="menu-item" type="button">Tools</button>
-          <button class="menu-item" type="button">Help</button>
-        </nav>
-      </header>
-
       <div class="top-actions">
         <div class="filename-input-wrapper">
           <input
