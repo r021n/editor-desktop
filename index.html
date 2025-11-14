@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Text Editor</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+          "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+        background: hsl(222.2, 84%, 4.9%);
+        color: hsl(210, 40%, 98%);
+        min-height: 100vh;
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 1200px;
+        background: hsl(222.2, 84%, 4.9%);
+      }
+
+      .app-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.75rem 1.25rem;
+        background: hsla(217.2, 32.6%, 17.5%, 0.6);
+        border: 1px solid hsl(217.2, 32.6%, 17.5%);
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+        position: sticky;
+        top: 1.5rem;
+        backdrop-filter: blur(12px);
+        z-index: 10;
+      }
+
+      .branding {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .branding-logo {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: linear-gradient(
+          135deg,
+          hsl(217.2, 91.2%, 59.8%),
+          hsl(263.4, 70%, 50.4%)
+        );
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        color: hsl(210, 40%, 98%);
+        letter-spacing: 0.08em;
+      }
+
+      .branding-text h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: hsl(210, 40%, 98%);
+        margin-bottom: 0.15rem;
+      }
+
+      .branding-text p {
+        color: hsl(215.4, 16.3%, 66.9%);
+        font-size: 0.85rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .menu-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .menu-item {
+        background: transparent;
+        border: 1px solid transparent;
+        color: hsl(215.4, 16.3%, 76.9%);
+        font-size: 0.85rem;
+        font-weight: 500;
+        padding: 0.35rem 0.9rem;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .menu-item:hover,
+      .menu-item:focus-visible {
+        color: hsl(210, 40%, 98%);
+        border-color: hsl(217.2, 91.2%, 59.8%);
+        background: hsla(217.2, 91.2%, 59.8%, 0.1);
+      }
+
+      .top-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        align-items: center;
+      }
+
+      .filename-input-wrapper {
+        display: flex;
+        gap: 0.5rem;
+        flex: 1;
+      }
+
+      .filename-input {
+        flex: 1;
+        padding: 0.625rem 0.75rem;
+        background: hsl(222.2, 84%, 4.9%);
+        color: hsl(210, 40%, 98%);
+        border: 1px solid hsl(217.2, 32.6%, 17.5%);
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.2s;
+      }
+
+      .filename-input::placeholder {
+        color: hsl(215.4, 16.3%, 46.9%);
+      }
+
+      .filename-input:focus {
+        border-color: hsl(217.2, 91.2%, 59.8%);
+        box-shadow: 0 0 0 2px hsl(217.2, 91.2%, 59.8%, 0.2);
+      }
+
+      .extension-select {
+        min-width: 120px;
+        padding: 0.625rem 0.75rem;
+        background: hsl(222.2, 84%, 4.9%);
+        color: hsl(210, 40%, 98%);
+        border: 1px solid hsl(217.2, 32.6%, 17.5%);
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        outline: none;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .extension-select:focus {
+        border-color: hsl(217.2, 91.2%, 59.8%);
+        box-shadow: 0 0 0 2px hsl(217.2, 91.2%, 59.8%, 0.2);
+      }
+
+      .extension-select option {
+        background: hsl(222.2, 84%, 4.9%);
+        color: hsl(210, 40%, 98%);
+      }
+
+      .custom-extension-input {
+        min-width: 100px;
+        padding: 0.625rem 0.75rem;
+        background: hsl(222.2, 84%, 4.9%);
+        color: hsl(210, 40%, 98%);
+        border: 1px solid hsl(217.2, 32.6%, 17.5%);
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.2s;
+        display: none;
+      }
+
+      .custom-extension-input.show {
+        display: block;
+      }
+
+      .custom-extension-input::placeholder {
+        color: hsl(215.4, 16.3%, 46.9%);
+      }
+
+      .custom-extension-input:focus {
+        border-color: hsl(217.2, 91.2%, 59.8%);
+        box-shadow: 0 0 0 2px hsl(217.2, 91.2%, 59.8%, 0.2);
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: hsl(210, 40%, 98%);
+        color: hsl(222.2, 47.4%, 11.2%);
+        border: none;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+      }
+
+      .btn:hover {
+        background: hsl(210, 40%, 96.1%);
+      }
+
+      .btn:active {
+        transform: scale(0.98);
+      }
+
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .btn-icon {
+        width: 16px;
+        height: 16px;
+        transition: all 0.3s;
+      }
+
+      .btn-icon-only {
+        padding: 0.5rem;
+        min-width: 36px;
+      }
+
+      .btn-icon.success {
+        color: hsl(142.1, 76.2%, 36.3%);
+      }
+
+      .btn-secondary {
+        background: hsl(217.2, 32.6%, 17.5%);
+        color: hsl(210, 40%, 98%);
+        border: 1px solid hsl(217.2, 32.6%, 17.5%);
+      }
+
+      .btn-secondary:hover {
+        background: hsl(217.2, 32.6%, 20%);
+      }
+
+      .keyboard-shortcut {
+        font-size: 0.75rem;
+        opacity: 0.7;
+        margin-left: 0.25rem;
+      }
+
+      /* Tabs */
+      .tabs-container {
+        display: flex;
+        gap: 0.25rem;
+        margin-bottom: 0.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+      }
+
+      .tab {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: hsl(217.2, 32.6%, 17.5%);
+        color: hsl(215.4, 16.3%, 66.9%);
+        border: 1px solid hsl(217.2, 32.6%, 17.5%);
+        border-radius: 0.375rem 0.375rem 0 0;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        min-width: 120px;
+        max-width: 200px;
+      }
+
+      .tab:hover {
+        background: hsl(217.2, 32.6%, 20%);
+      }
+
+      .tab.active {
+        background: hsl(222.2, 84%, 4.9%);
+        color: hsl(210, 40%, 98%);
+        border-color: hsl(217.2, 91.2%, 59.8%);
+        border-bottom-color: hsl(222.2, 84%, 4.9%);
+      }
+
+      .tab-title {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .tab-close {
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.25rem;
+        transition: all 0.2s;
+      }
+
+      .tab-close:hover {
+        background: hsl(0, 84.2%, 60.2%);
+        color: white;
+      }
+
+      .tab-close svg {
+        width: 12px;
+        height: 12px;
+      }
+
+      .tab-new {
+        padding: 0.5rem;
+        background: hsl(217.2, 32.6%, 17.5%);
+        border: 1px solid hsl(217.2, 32.6%, 17.5%);
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .tab-new:hover {
+        background: hsl(217.2, 32.6%, 20%);
+      }
+
+      .tab-new svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .editor-container {
+        display: flex;
+        gap: 1rem;
+        position: relative;
+      }
+
+      .editor-main {
+        flex: 1;
+      }
+
+      .editor-wrapper {
+        background: hsl(222.2, 84%, 4.9%);
+        border: 1px solid hsl(217.2, 32.6%, 17.5%);
+        border-radius: 0.5rem;
+        overflow: hidden;
+        transition: border-color 0.2s;
+      }
+
+      .editor-wrapper:focus-within {
+        border-color: hsl(217.2, 91.2%, 59.8%);
+        outline: 2px solid hsl(217.2, 91.2%, 59.8%);
+        outline-offset: 2px;
+      }
+
+      .textarea-container {
+        position: relative;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 500px;
+        padding: 1rem;
+        background: hsl(222.2, 84%, 4.9%);
+        color: hsl(210, 40%, 98%);
+        border: none;
+        outline: none;
+        font-family: "Courier New", monospace;
+        font-size: 0.875rem;
+        line-height: 1.6;
+        resize: vertical;
+      }
+
+      textarea::placeholder {
+        color: hsl(215.4, 16.3%, 46.9%);
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: hsl(217.2, 32.6%, 17.5%);
+        border-top: 1px solid hsl(217.2, 32.6%, 17.5%);
+        flex-wrap: wrap;
+      }
+
+      .notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        background: hsl(142.1, 76.2%, 36.3%);
+        color: hsl(210, 40%, 98%);
+        padding: 1rem 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        gap: 0.75rem;
+        animation: slideIn 0.3s ease-out;
+        z-index: 1000;
+      }
+
+      .notification.show {
+        display: flex;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      .char-count {
+        padding: 0.75rem 1rem;
+        background: hsl(217.2, 32.6%, 17.5%);
+        border-top: 1px solid hsl(217.2, 32.6%, 17.5%);
+        font-size: 0.75rem;
+        color: hsl(215.4, 16.3%, 46.9%);
+        text-align: right;
+      }
+
+      /* Table of Contents Sidebar */
+      .toc-sidebar {
+        width: 250px;
+        background: hsl(222.2, 84%, 4.9%);
+        border: 1px solid hsl(217.2, 32.6%, 17.5%);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        max-height: 600px;
+        overflow-y: auto;
+        position: sticky;
+        top: 2rem;
+      }
+
+      .toc-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: hsl(210, 40%, 98%);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid hsl(217.2, 32.6%, 17.5%);
+      }
+
+      .toc-list {
+        list-style: none;
+      }
+
+      .toc-item {
+        position: relative;
+        padding-left: 1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .toc-item::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.5rem;
+        width: 6px;
+        height: 6px;
+        background: hsl(217.2, 91.2%, 59.8%);
+        border-radius: 50%;
+      }
+
+      .toc-link {
+        display: block;
+        font-size: 0.8rem;
+        color: hsl(215.4, 16.3%, 66.9%);
+        text-decoration: none;
+        transition: color 0.2s;
+        cursor: pointer;
+        padding: 0.25rem 0;
+        word-break: break-word;
+      }
+
+      .toc-link:hover {
+        color: hsl(217.2, 91.2%, 59.8%);
+      }
+
+      .toc-empty {
+        font-size: 0.8rem;
+        color: hsl(215.4, 16.3%, 46.9%);
+        font-style: italic;
+      }
+
+      /* Tooltip */
+      .toc-tooltip {
+        position: absolute;
+        background: hsl(217.2, 32.6%, 17.5%);
+        color: hsl(210, 40%, 98%);
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        z-index: 100;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      }
+
+      .toc-tooltip.show {
+        opacity: 1;
+      }
+
+      /* File input hidden */
+      #fileInput {
+        display: none;
+      }
+
+      /* Scrollbar styling */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: hsl(217.2, 32.6%, 25%) hsl(222.2, 84%, 4.9%);
+      }
+
+      *::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+
+      *::-webkit-scrollbar-track {
+        background: hsl(222.2, 84%, 4.9%);
+        border-radius: 5px;
+      }
+
+      *::-webkit-scrollbar-thumb {
+        background: hsl(217.2, 32.6%, 25%);
+        border-radius: 5px;
+        border: 2px solid hsl(222.2, 84%, 4.9%);
+      }
+
+      *::-webkit-scrollbar-thumb:hover {
+        background: hsl(217.2, 32.6%, 30%);
+      }
+
+      *::-webkit-scrollbar-thumb:active {
+        background: hsl(217.2, 91.2%, 59.8%);
+      }
+
+      @media (max-width: 1024px) {
+        .app-bar {
+          flex-direction: column;
+          align-items: flex-start;
+          position: static;
+        }
+
+        .branding-text p {
+          white-space: normal;
+        }
+
+        .menu-bar {
+          width: 100%;
+          justify-content: flex-start;
+        }
+
+        .editor-container {
+          flex-direction: column-reverse;
+        }
+
+        .toc-sidebar {
+          width: 100%;
+          max-height: 200px;
+          position: static;
+        }
+      }
+
+      @media (max-width: 640px) {
+        body {
+          padding: 1rem;
+        }
+
+        .header h1 {
+          font-size: 1.5rem;
+        }
+
+        textarea {
+          min-height: 300px;
+        }
+
+        .toolbar {
+          flex-direction: column;
+        }
+
+        .btn {
+          width: 100%;
+        }
+
+        .top-actions {
+          flex-direction: column;
+        }
+
+        .filename-input-wrapper {
+          flex-direction: column;
+        }
+
+        .extension-select,
+        .custom-extension-input {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="app-bar" aria-label="Menu utama aplikasi">
+        <div class="branding">
+          <div class="branding-logo" aria-hidden="true">TE</div>
+          <div class="branding-text">
+            <h1>Text Editor</h1>
+            <p>Tulis, copy, atau download teks Anda secara cepat.</p>
+          </div>
+        </div>
+        <nav class="menu-bar" aria-label="Navigasi utama">
+          <button class="menu-item" type="button">File</button>
+          <button class="menu-item" type="button">Edit</button>
+          <button class="menu-item" type="button">View</button>
+          <button class="menu-item" type="button">Tools</button>
+          <button class="menu-item" type="button">Help</button>
+        </nav>
+      </header>
+
+      <div class="top-actions">
+        <div class="filename-input-wrapper">
+          <input
+            type="text"
+            id="filenameInput"
+            class="filename-input"
+            placeholder="code_file"
+          />
+          <select id="extensionSelect" class="extension-select">
+            <option value=".txt">.txt</option>
+            <option value=".js">.js</option>
+            <option value=".html">.html</option>
+            <option value=".css">.css</option>
+            <option value=".json">.json</option>
+            <option value=".md">.md</option>
+            <option value=".py">.py</option>
+            <option value=".java">.java</option>
+            <option value=".cpp">.cpp</option>
+            <option value=".c">.c</option>
+            <option value=".php">.php</option>
+            <option value=".xml">.xml</option>
+            <option value=".sql">.sql</option>
+            <option value=".sh">.sh</option>
+            <option value=".csv">.csv</option>
+            <option value="custom">Custom...</option>
+          </select>
+          <input
+            type="text"
+            id="customExtensionInput"
+            class="custom-extension-input"
+            placeholder=".ext"
+          />
+        </div>
+
+        <button
+          class="btn btn-secondary btn-icon-only"
+          id="openFileBtn"
+          title="Open File"
+        >
+          <svg
+            class="btn-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+            ></path>
+          </svg>
+        </button>
+
+        <button class="btn btn-icon-only" id="copyBtn" title="Copy Text">
+          <svg
+            class="btn-icon"
+            id="copyIcon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path
+              d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+            ></path>
+          </svg>
+        </button>
+
+        <button class="btn btn-icon-only" id="downloadBtn" title="Download">
+          <svg
+            class="btn-icon"
+            id="downloadIcon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </button>
+      </div>
+
+      <input
+        type="file"
+        id="fileInput"
+        accept="text/*,.txt,.js,.html,.css,.json,.md,.py,.java,.cpp,.c,.php,.xml,.sql,.sh,.csv"
+      />
+
+      <div class="tabs-container" id="tabsContainer">
+        <div class="tab active" data-tab-id="0">
+          <span class="tab-title">Untitled 1</span>
+          <span class="tab-close" onclick="closeTab(0, event)">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </span>
+        </div>
+        <button class="tab-new" onclick="createNewTab()" title="New Tab">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="editor-container">
+        <div class="editor-main">
+          <div class="editor-wrapper">
+            <div class="textarea-container">
+              <textarea
+                id="textArea"
+                placeholder="Mulai menulis di sini...
+
+Tekan Ctrl+H untuk menambahkan header"
+              ></textarea>
+            </div>
+
+            <div class="toolbar">
+              <button class="btn btn-secondary" id="headerBtn">
+                <svg
+                  class="btn-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M4 12h8"></path>
+                  <path d="M4 18V6"></path>
+                  <path d="M12 18V6"></path>
+                  <path d="M21 18h-4c0-4 4-3 4-6 0-1.5-2-2.5-4-1"></path>
+                </svg>
+                Tambah Header
+                <span class="keyboard-shortcut">(Ctrl+H)</span>
+              </button>
+            </div>
+
+            <div class="char-count">
+              <span id="charCount">0 karakter</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="toc-sidebar">
+          <div class="toc-title">Daftar Header</div>
+          <ul class="toc-list" id="tocList">
+            <li class="toc-empty">
+              Belum ada header. Tekan Ctrl+H untuk menambah.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="notification" id="notification">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      <span id="notificationText"></span>
+    </div>
+
+    <div class="toc-tooltip" id="tocTooltip"></div>
+
+    <script>
+      const textArea = document.getElementById("textArea");
+      const copyBtn = document.getElementById("copyBtn");
+      const downloadBtn = document.getElementById("downloadBtn");
+      const openFileBtn = document.getElementById("openFileBtn");
+      const fileInput = document.getElementById("fileInput");
+      const headerBtn = document.getElementById("headerBtn");
+      const charCount = document.getElementById("charCount");
+      const notification = document.getElementById("notification");
+      const notificationText = document.getElementById("notificationText");
+      const filenameInput = document.getElementById("filenameInput");
+      const extensionSelect = document.getElementById("extensionSelect");
+      const customExtensionInput = document.getElementById(
+        "customExtensionInput"
+      );
+      const tocList = document.getElementById("tocList");
+      const tocTooltip = document.getElementById("tocTooltip");
+      const tabsContainer = document.getElementById("tabsContainer");
+
+      // Tab management
+      let tabs = [];
+      let activeTabId = 0;
+      let nextTabId = 1;
+
+      // Initialize first tab
+      tabs.push({
+        id: 0,
+        title: "Untitled 1",
+        content: "",
+        filename: "code_file",
+        extension: ".txt",
+      });
+
+      function createNewTab() {
+        const newTab = {
+          id: nextTabId,
+          title: `Untitled ${nextTabId + 1}`,
+          content: "",
+          filename: "code_file",
+          extension: ".txt",
+        };
+        tabs.push(newTab);
+        renderTabs();
+        switchTab(nextTabId);
+        nextTabId++;
+      }
+
+      function closeTab(tabId, event) {
+        event.stopPropagation();
+
+        if (tabs.length === 1) {
+          showNotification("Tidak bisa menutup tab terakhir!");
+          return;
+        }
+
+        const tabIndex = tabs.findIndex((t) => t.id === tabId);
+        tabs.splice(tabIndex, 1);
+
+        if (activeTabId === tabId) {
+          const newActiveTab = tabs[Math.max(0, tabIndex - 1)];
+          switchTab(newActiveTab.id);
+        }
+
+        renderTabs();
+      }
+
+      function switchTab(tabId) {
+        // Save current tab content
+        const currentTab = tabs.find((t) => t.id === activeTabId);
+        if (currentTab) {
+          currentTab.content = textArea.value;
+          currentTab.filename = filenameInput.value || "code_file";
+          currentTab.extension =
+            extensionSelect.value === "custom"
+              ? customExtensionInput.value
+              : extensionSelect.value;
+        }
+
+        // Switch to new tab
+        activeTabId = tabId;
+        const newTab = tabs.find((t) => t.id === tabId);
+
+        textArea.value = newTab.content;
+        filenameInput.value = newTab.filename;
+
+        if (newTab.extension && !newTab.extension.startsWith(".")) {
+          extensionSelect.value = "custom";
+          customExtensionInput.value = newTab.extension;
+          customExtensionInput.classList.add("show");
+        } else {
+          const optionExists = Array.from(extensionSelect.options).some(
+            (opt) => opt.value === newTab.extension
+          );
+          if (optionExists) {
+            extensionSelect.value = newTab.extension;
+            customExtensionInput.classList.remove("show");
+          } else {
+            extensionSelect.value = "custom";
+            customExtensionInput.value = newTab.extension;
+            customExtensionInput.classList.add("show");
+          }
+        }
+
+        renderTabs();
+        updateCharCount();
+        updateTOC();
+      }
+
+      function renderTabs() {
+        const tabElements = tabs
+          .map((tab) => {
+            const isActive = tab.id === activeTabId;
+            return `
+                    <div class="tab ${isActive ? "active" : ""}" data-tab-id="${
+              tab.id
+            }" onclick="switchTab(${tab.id})">
+                        <span class="tab-title">${escapeHtml(tab.title)}</span>
+                        <span class="tab-close" onclick="closeTab(${
+                          tab.id
+                        }, event)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </span>
+                    </div>
+                `;
+          })
+          .join("");
+
+        tabsContainer.innerHTML =
+          tabElements +
+          `
+                <button class="tab-new" onclick="createNewTab()" title="New Tab">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+            `;
+      }
+
+      // Open file
+      openFileBtn.addEventListener("click", () => {
+        fileInput.click();
+      });
+
+      fileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const content = event.target.result;
+          textArea.value = content;
+
+          // Update filename
+          const fileName = file.name;
+          const lastDotIndex = fileName.lastIndexOf(".");
+          if (lastDotIndex > 0) {
+            filenameInput.value = fileName.substring(0, lastDotIndex);
+            const ext = fileName.substring(lastDotIndex);
+
+            const optionExists = Array.from(extensionSelect.options).some(
+              (opt) => opt.value === ext
+            );
+            if (optionExists) {
+              extensionSelect.value = ext;
+              customExtensionInput.classList.remove("show");
+            } else {
+              extensionSelect.value = "custom";
+              customExtensionInput.value = ext;
+              customExtensionInput.classList.add("show");
+            }
+          } else {
+            filenameInput.value = fileName;
+          }
+
+          // Update current tab
+          const currentTab = tabs.find((t) => t.id === activeTabId);
+          if (currentTab) {
+            currentTab.title = fileName;
+            currentTab.content = content;
+            currentTab.filename = filenameInput.value;
+            renderTabs();
+          }
+
+          updateCharCount();
+          updateTOC();
+          showNotification("File berhasil dibuka!");
+        };
+        reader.readAsText(file);
+        fileInput.value = "";
+      });
+
+      // Handle custom extension
+      extensionSelect.addEventListener("change", () => {
+        if (extensionSelect.value === "custom") {
+          customExtensionInput.classList.add("show");
+          customExtensionInput.focus();
+        } else {
+          customExtensionInput.classList.remove("show");
+        }
+      });
+
+      // Update character count
+      function updateCharCount() {
+        const count = textArea.value.length;
+        charCount.textContent = `${count.toLocaleString("id-ID")} karakter`;
+      }
+
+      textArea.addEventListener("input", () => {
+        updateCharCount();
+        updateTOC();
+      });
+
+      // Show notification
+      function showNotification(message) {
+        notificationText.textContent = message;
+        notification.classList.add("show");
+        setTimeout(() => {
+          notification.classList.remove("show");
+        }, 3000);
+      }
+
+      // Add header
+      function addHeader() {
+        const cursorPos = textArea.selectionStart;
+        const textBefore = textArea.value.substring(0, cursorPos);
+        const textAfter = textArea.value.substring(cursorPos);
+
+        const lineStart = textBefore.lastIndexOf("\n") + 1;
+        const currentLine = textBefore.substring(lineStart);
+
+        if (!currentLine.trim().startsWith("## ")) {
+          const newText =
+            textBefore.substring(0, lineStart) +
+            "## " +
+            currentLine +
+            textAfter;
+          textArea.value = newText;
+          textArea.selectionStart = textArea.selectionEnd = cursorPos + 3;
+        } else {
+          showNotification("Baris ini sudah memiliki header!");
+        }
+
+        textArea.focus();
+        updateTOC();
+      }
+
+      headerBtn.addEventListener("click", addHeader);
+
+      // Keyboard shortcut for header (Ctrl+H)
+      textArea.addEventListener("keydown", (e) => {
+        if (e.ctrlKey && e.key === "h") {
+          e.preventDefault();
+          addHeader();
+        }
+      });
+
+      // Update Table of Contents
+      function updateTOC() {
+        const lines = textArea.value.split("\n");
+        const headers = [];
+
+        lines.forEach((line, index) => {
+          if (line.trim().startsWith("## ")) {
+            const headerText = line.trim().substring(3).trim();
+            if (headerText) {
+              headers.push({
+                text: headerText,
+                lineIndex: index,
+              });
+            }
+          }
+        });
+
+        if (headers.length === 0) {
+          tocList.innerHTML =
+            '<li class="toc-empty">Belum ada header. Tekan Ctrl+H untuk menambah.</li>';
+        } else {
+          tocList.innerHTML = headers
+            .map((header, idx) => {
+              const truncated = truncateText(header.text, 4);
+              return `
+                        <li class="toc-item">
+                            <a class="toc-link" data-line="${
+                              header.lineIndex
+                            }" data-full-text="${escapeHtml(
+                header.text
+              )}" data-truncated="${escapeHtml(truncated)}">
+                                ${escapeHtml(truncated)}
+                            </a>
+                        </li>
+                    `;
+            })
+            .join("");
+
+          // Add click listeners
+          document.querySelectorAll(".toc-link").forEach((link) => {
+            link.addEventListener("click", function () {
+              const lineIndex = parseInt(this.dataset.line);
+              scrollToLine(lineIndex);
+            });
+
+            // Tooltip on hover
+            link.addEventListener("mouseenter", function (e) {
+              const fullText = this.dataset.fullText;
+              const truncated = this.dataset.truncated;
+
+              if (fullText !== truncated) {
+                tocTooltip.textContent = fullText;
+                tocTooltip.classList.add("show");
+
+                const rect = this.getBoundingClientRect();
+                tocTooltip.style.left =
+                  rect.left - tocTooltip.offsetWidth - 10 + "px";
+                tocTooltip.style.top = rect.top + "px";
+              }
+            });
+
+            link.addEventListener("mouseleave", function () {
+              tocTooltip.classList.remove("show");
+            });
+          });
+        }
+      }
+
+      // Truncate text to max words
+      function truncateText(text, maxWords) {
+        const words = text.split(" ");
+        if (words.length <= maxWords) {
+          return text;
+        }
+        return words.slice(0, maxWords).join(" ") + "...";
+      }
+
+      // Escape HTML
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Scroll to specific line
+      function scrollToLine(lineIndex) {
+        const lines = textArea.value.split("\n");
+        let charPosition = 0;
+
+        for (let i = 0; i < lineIndex; i++) {
+          charPosition += lines[i].length + 1;
+        }
+
+        textArea.focus();
+        textArea.setSelectionRange(charPosition, charPosition);
+
+        const lineHeight = 1.6 * 14;
+        const scrollPosition = lineIndex * lineHeight;
+        textArea.scrollTop = scrollPosition - textArea.clientHeight / 3;
+
+        showNotification("Melompat ke header!");
+      }
+
+      // Copy functionality
+      copyBtn.addEventListener("click", async () => {
+        const text = textArea.value;
+
+        if (!text) {
+          showNotification("Tidak ada text untuk di-copy!");
+          return;
+        }
+
+        try {
+          await navigator.clipboard.writeText(text);
+          showSuccessIcon("copyIcon");
+          showNotification("Text berhasil di-copy!");
+        } catch (err) {
+          textArea.select();
+          document.execCommand("copy");
+          showSuccessIcon("copyIcon");
+          showNotification("Text berhasil di-copy!");
+        }
+      });
+
+      // Download functionality
+      downloadBtn.addEventListener("click", () => {
+        const text = textArea.value;
+
+        if (!text) {
+          showNotification("Tidak ada text untuk di-download!");
+          return;
+        }
+
+        const blob = new Blob([text], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+
+        let filename = filenameInput.value.trim();
+        if (!filename) {
+          filename = "code_file";
+        }
+
+        let extension;
+        if (extensionSelect.value === "custom") {
+          extension = customExtensionInput.value.trim();
+          if (!extension.startsWith(".")) {
+            extension = "." + extension;
+          }
+        } else {
+          extension = extensionSelect.value;
+        }
+
+        filename = filename + extension;
+
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showSuccessIcon("downloadIcon");
+        showNotification("Text berhasil di-download!");
+      });
+
+      // Show success icon (checkmark)
+      function showSuccessIcon(iconId) {
+        const icon = document.getElementById(iconId);
+        const originalHTML = icon.innerHTML;
+
+        icon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+        icon.classList.add("success");
+
+        setTimeout(() => {
+          icon.innerHTML = originalHTML;
+          icon.classList.remove("success");
+        }, 2000);
+      }
+
+      // Auto-save tabs
+      textArea.addEventListener("input", () => {
+        const currentTab = tabs.find((t) => t.id === activeTabId);
+        if (currentTab) {
+          currentTab.content = textArea.value;
+        }
+        saveTabs();
+      });
+
+      function saveTabs() {
+        localStorage.setItem("editorTabs", JSON.stringify(tabs));
+        localStorage.setItem("activeTabId", activeTabId);
+      }
+
+      // Load saved tabs
+      window.addEventListener("load", () => {
+        const savedTabs = localStorage.getItem("editorTabs");
+        const savedActiveTabId = localStorage.getItem("activeTabId");
+
+        if (savedTabs) {
+          tabs = JSON.parse(savedTabs);
+          activeTabId = savedActiveTabId
+            ? parseInt(savedActiveTabId)
+            : tabs[0].id;
+          nextTabId = Math.max(...tabs.map((t) => t.id)) + 1;
+
+          renderTabs();
+          switchTab(activeTabId);
+        }
+      });
+
+      // Initial render
+      renderTabs();
+    </script>
+  </body>
+</html>
